@@ -1,3 +1,3 @@
 # leetcode-sql
 
-My LeetCode SQL solutions (MYSQL). 
+My LeetCode database solutions (MYSQL). 
