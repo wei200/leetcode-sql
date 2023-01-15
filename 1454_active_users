@@ -1,0 +1,42 @@
+
+-- rank the login_date by id
+with temp0 as (
+    select
+        id,
+        login_date,
+        dense_rank() over (partition by id order by login_date) as row_num
+    from Logins
+),
+-- label users into different groupings
+temp1 as (
+    select
+        id,
+        login_date,
+        row_num,
+        date_add(login_date,interval -row_num day) as groupings
+    from temp0
+),
+
+-- only keep those whose duration > = 4 days (login >= 5 consecutive days)
+answer_table as (
+    select
+        id,
+        min(login_date) as start_date,
+        max(login_date) as end_date,
+        row_num,
+        groupings,
+        datediff(max(login_date),min(login_date)) as duration
+    from temp1
+    group by id, groupings
+    having datediff(max(login_date),min(login_date)) >= 4
+    order by id,start_date
+)
+
+select 
+    distinct ans.id,
+    acc.name
+from answer_table ans
+left join Accounts acc
+on ans.id=acc.id
+order by 1
+
